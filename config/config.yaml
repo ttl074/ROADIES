@@ -14,6 +14,7 @@ UPPER_CASE: 0.90
 OUT_DIR: "output_files"
 #ROADIES output directory for all iterations (not needed in --noconverge option)
 ALL_OUT_DIR: "converge_files"
+REF_DIR: "reference_files"
 #Minimum % match in LASTZ alignment
 IDENTITY: 65
 #Minimum % match in LASTZ alignment in deep mode - to capture deeper phylogeny
