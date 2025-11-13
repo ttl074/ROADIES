@@ -26,8 +26,8 @@ elif (mode == "balanced"):
 	include: "rules/sampling.smk"
 	include: "rules/fasttree.smk"
 else:
-	include: "rules/align.smk"
-	include: "rules/sampling.smk"
+	include: "rules/align_kegalign.smk"
+	# include: "rules/sampling.smk"
 	include: "rules/tree.smk"
 	
 rule all:
