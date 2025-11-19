@@ -1,0 +1,12 @@
+name: lastz
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - python=3.12.*
+  - kegalign=0.1.2.8
+  - ucsc-fatotwobit
+  - lastz=1.04.22
+  - cmake
+  - tbb
