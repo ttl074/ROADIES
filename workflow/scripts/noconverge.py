@@ -61,20 +61,39 @@ def converge_run(
     fixed_parallel_instances,
     deep_mode,
     MIN_ALIGN,
+    ref_path,
 ):
     # run snakemake with specificed gene number and length
     run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN)
-    # merging gene trees and mapping files
-    os.system(
-        "astral-pro3 -t {1} -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies.nwk -a {0}/genes/mapping.txt".format(
-            roadies_dir, cores
+    if (mode == 'placement'):
+        os.system(
+            "cat {0}/genes/mapping.txt {1}/genes/mapping.txt >> {0}/genes/mapping_combined.txt".format(
+                roadies_dir, ref_path
+            )
         )
-    )
-    os.system(
-        "astral-pro3 -t {1} -u 3 -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies_stats.nwk -a {0}/genes/mapping.txt".format(
-            roadies_dir, cores
+        os.system(
+            "astral-pro3 -t {1} -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies.nwk -a {0}/genes/mapping_combined.txt".format(
+                roadies_dir, cores
+            )
         )
-    )
+        os.system(
+            "astral-pro3 -t {1} -u 3 -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies_stats.nwk -a {0}/genes/mapping_combined.txt".format(
+                roadies_dir, cores
+            )
+        )
+    else:
+        os.system(
+            "astral-pro3 -t {1} -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies.nwk -a {0}/genes/mapping.txt".format(
+                roadies_dir, cores
+            )
+        )
+        os.system(
+            "astral-pro3 -t {1} -u 3 -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies_stats.nwk -a {0}/genes/mapping.txt".format(
+                roadies_dir, cores
+            )
+        )
+
+
     gt = open(roadies_dir + "/genetrees/gene_tree_merged.nwk", "r")
     gene_trees = gt.readlines()
     gt.close()
@@ -133,6 +152,7 @@ if __name__ == "__main__":
     MIN_ALIGN = max(4, math.ceil(0.1 * NUM_GENOMES))
     roadies_dir = config["OUT_DIR"]
     fixed_parallel_instances = config["NUM_INSTANCES"]
+    ref_path = config["REF_DIR"]
     os.system("rm -r {0}".format(roadies_dir))
     os.system("mkdir {0}".format(roadies_dir))
     os.system("rm {0}".format('sampling_output.txt'))
@@ -160,6 +180,7 @@ if __name__ == "__main__":
         fixed_parallel_instances,
         deep_mode,
         MIN_ALIGN,
+        ref_path,
     )
     curr_time = time.time()
     curr_time_l = time.asctime(time.localtime(time.time()))

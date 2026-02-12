@@ -32,7 +32,10 @@ outdir = args.outdir
 plotdir = args.plotdir
 statdir = args.statdir
 tool = args.tool
-m = args.m
+if tool == "placement":
+    m = 1 #args.m
+else:
+    m = args.m
 k = args.k
 d = args.d
 num_genes = {}

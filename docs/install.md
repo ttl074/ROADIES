@@ -1,12 +1,10 @@
 # Installation Methods
 
-## Using ROADIES Bioconda package
+Please follow any of the options below to install ROADIES in your system. 
 
-To run ROADIES using Bioconda package, follow these steps:
+## Option 1: Install via Bioconda (Recommended)
 
-**Note:** You need to have conda installed in your system. Also make sure you have updated version of glibc in your system (`GLIBC >= 2.29`).
-
-To install and use conda in Ubuntu machine, execute the set of commands below:
+1. Install Conda (if not installed):
 
 ```bash
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -15,92 +13,115 @@ chmod +x Miniconda3-latest-Linux-x86_64.sh
 
 export PATH="$HOME/miniconda3/bin:$PATH"
 source ~/.bashrc
+```
 
+2. Configure Conda channels:
+
+```bash
 conda config --add channels defaults
+```
+```bash
 conda config --add channels bioconda
+```
+```bash
 conda config --add channels conda-forge
 ```
 
-After this, try running `conda` in your terminal to check if conda is properly installed. Once it is installed, follow the steps below:
+Verify the installation by running `conda` in your terminal
 
-1. Create and activate custom conda environment with Python version 3.9
+3. Create and activate a custom environment:
 
 ```bash
-conda create -n myenv python=3.9
-conda activate myenv
+conda create -n roadies_env python=3.9 ete3 seaborn
+```
+```bash
+conda activate roadies_env
 ```
 
-2. Install ROADIES bioconda package
+4. Install ROADIES:
 
+```bash
+conda install roadies=0.1.10
 ```
-conda install roadies
+
+5. Locate the installed files:
+
+```bash
+cd $CONDA_PREFIX/ROADIES
 ```
 
-All files of ROADIES along with dependencies will be found in `<conda_install_path>/miniconda3/envs/new_env/ROADIES`.
+Now, you will be able to find the contents of the repository within this ROADIES folder.
 
-## Using DockerHub
+6. Run the following commands:
 
-To run ROADIES using DockerHub, follow these steps:
+```bash
+git clone https://github.com/smirarab/pasta.git
+git clone https://github.com/smirarab/sate-tools-linux.git
+cd pasta
+python3 setup.py develop --user
+```
 
-1. Pull the ROADIES Docker image from DockerHub:
+Also, in the `align.smk` file (inside the `workflow/rules` directory of the ROADIES repository), please replace any instance of:
+
+- `pasta.py` with `python pasta/run_pasta.py`
+- `run_seqtools.py` with `python pasta/run_seqtools.py`
+
+After following all these steps, now you are ready to follow the Quick Start section to run the pipeline. Make sure to go back to the main directory to follow the next steps:
+
+```bash
+cd ROADIES
+```
+
+## Option 2: Install via DockerHub
+
+If you would like to install ROADIES using DockerHub, follow these steps:
+
+1. Pull the ROADIES image from DockerHub:
 
 ```bash
 docker pull ang037/roadies:latest
 ```
-2. Run the Docker container:
+2. Launch a container:
 
 ```bash
 docker run -it ang037/roadies:latest
 ```
 
-## Using Docker locally
+These commands will launch the Docker container in interactive mode, with the roadies_env environment activated and the working directory set to the ROADIES repository containing all necessary files. Once you are able to access the ROADIES repository, refer to the Quick Start section to run the pipeline. 
 
-First, clone the repository (requires `git` to be installed in the system):
+## Option 3: Install via Local Docker Build
+
+1. Clone the ROADIES repository:
 
 ```bash
 git clone https://github.com/TurakhiaLab/ROADIES.git
+```
+```bash
 cd ROADIES
 ```
 
-Then build and run the Docker container:
+2. Build and run the Docker container:
 
 ```bash
 docker build -t roadies_image .
+```
+```bash
 docker run -it roadies_image
 ```
 
-## Using installation script (requires sudo access)
+Once you are able to access the ROADIES repository, refer to Quick Start instructions to run the pipeline. 
 
-First clone the repository:
+## Option 4: Install via Source Script
 
-```bash
-git clone https://github.com/TurakhiaLab/ROADIES.git
-cd ROADIES
-```
+1. Install the following dependencies (**requires sudo access**):
 
-Then, execute the installation script:
-
-```bash
-chmod +x roadies_env.sh
-source roadies_env.sh
-```
-
-This will install and build all tools and dependencies. Once the setup is complete, it will print `Setup complete` in the terminal and activate the `roadies_env` environment with all Conda packages installed. 
-
-!!! Note 
-    ROADIES is built on [Snakemake (workflow parallelization tool)](https://snakemake.readthedocs.io/en/stable/). It also requires various tools (PASTA, LASTZ, RAxML-NG, MashTree, FastTree, ASTRAL-Pro2) to be installed before performing the analysis. To ease the process, instead of individually installing the tools, we provide `roadies_env.sh` script to automatically download all dependencies into the user system.
-
-### Required dependencies
-
-To run this script, ensure the following dependencies are installed:
-- Java Runtime Environment (version 1.7 or higher)
-- Python (version 3 or higher)
+- Java Runtime Environment (Version 1.7 or higher)
+- Python (Version 3.9 or higher)
 - `wget` and `unzip` commands
-- GCC (version 11.4 or higher)
+- GCC (Version 11.4 or higher)
 - cmake (Download here: https://cmake.org/download/)
 - Boost library (Download here: https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/)
 - zlib (Download here: http://www.zlib.net/)
-- GLIBC (Version 2.29 or higher)
 
 For Ubuntu, you can install these dependencies with: 
 
@@ -108,5 +129,25 @@ For Ubuntu, you can install these dependencies with:
 sudo apt-get install -y wget unzip make g++ python3 python3-pip python3-setuptools git default-jre libgomp1 libboost-all-dev cmake
 ```
 
-!!! Warning
+2. Clone the repository:
+
+```bash
+git clone https://github.com/TurakhiaLab/ROADIES.git
+```
+```bash
+cd ROADIES
+```
+
+3. Run the installation script:
+
+```bash
+chmod +x roadies_env.sh
+```
+```bash
+source roadies_env.sh
+```
+
+After successful setup (Setup complete message), your environment `roadies_env` will be activated. Proceed to Quick Start.
+
+!!! Note
     If you encounter issues with the Boost library, add its path to `$CPLUS_LIBRARY_PATH` and save it in `~/.bashrc`.
