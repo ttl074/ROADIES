@@ -135,6 +135,7 @@ if __name__ == "__main__":
     fixed_parallel_instances = config["NUM_INSTANCES"]
     os.system("rm -r {0}".format(roadies_dir))
     os.system("mkdir {0}".format(roadies_dir))
+    os.system("rm {0}".format('sampling_output.txt'))
     sys.setrecursionlimit(2000)
     os.system("snakemake --unlock")
     # initialize lists for runs and distances

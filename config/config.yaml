@@ -1,17 +1,17 @@
 #This file configures the parameters for ROADIES
 
 #Path for input genomes
-GENOMES: "test/test_data"
+GENOMES: "/data/ang037/roadies-datasets/bamboo"
 #Reference tree (optional, default set as null)
 REFERENCE: NULL
 #Length of each of the genes
 LENGTH: 500
 #Number of genes per iteration
-GENE_COUNT: 250
+GENE_COUNT: 100
 #Minimum % uppercase for sampling valid genes
 UPPER_CASE: 0.90
 #ROADIES output directory for current iteration
-OUT_DIR: "output_files"
+OUT_DIR: "output_files_dummy"
 #ROADIES output directory for all iterations (not needed in --noconverge option)
 ALL_OUT_DIR: "converge_files"
 #Minimum % match in LASTZ alignment
@@ -32,6 +32,7 @@ MASKSITES: 0.02
 #Threshold for high support (not needed in --noconverge option)
 SUPPORT_THRESHOLD: 0.95
 #Number of instances to run in parallel
-NUM_INSTANCES: 4
+NUM_INSTANCES: 16
 #Scoring matrix (used in deep mode)
 SCORES: "HOXD55.q"
+GROUP_CSV: group_file.csv
