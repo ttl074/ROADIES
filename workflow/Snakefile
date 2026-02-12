@@ -17,8 +17,9 @@ else:
 num = config["GENE_COUNT"]
 IDS = list(range(1,num+1))
 mode = config.get("mode","accurate")
-deep_mode = config.get("deep_mode","False")
+deep_mode = config.get("deep","False")
 MIN_ALIGN = config.get("MIN_ALIGN",4)
+num_gpus = config.get("gpu",0)
 
 SELECTED_SAMPLES = []
 od = {}
@@ -50,14 +51,28 @@ with open("sampling_output.txt") as f:
 if (mode == "fast"):
 	include: "rules/mashtree.smk"
 elif (mode == "balanced"):
-	include: "rules/align.smk"
 	include: "rules/sampling.smk"
+	if num_gpus != 0:
+		include: "rules/pair_align_gpu.smk"
+		include: "rules/multi_align_gpu.smk"
+	else:
+		include: "rules/pair_align.smk"
+		include: "rules/multi_align.smk"
 	include: "rules/fasttree.smk"
 elif (mode == "placement"):
+	if num_gpus != 0:
+		include: "rules/pair_align_gpu.smk"
+	else:
+		include: "rules/pair_align.smk"
 	include: "rules/placement.smk"
 else:
 	include: "rules/sampling.smk"
-	include: "rules/align.smk"
+	if num_gpus != 0:
+		include: "rules/pair_align_gpu.smk"
+		include: "rules/multi_align_gpu.smk"
+	else:
+		include: "rules/pair_align.smk"
+		include: "rules/multi_align.smk"
 	include: "rules/tree.smk"
 	
 rule all:

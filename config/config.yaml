@@ -1,7 +1,7 @@
 #This file configures the parameters for ROADIES
 
 #Path for input genomes
-GENOMES: "/data/ang037/roadies-datasets/bamboo"
+GENOMES: "/data/ang037/roadies-datasets/bamboo_query"
 #Reference tree (optional, default set as null)
 REFERENCE: NULL
 #Length of each of the genes
@@ -11,10 +11,10 @@ GENE_COUNT: 100
 #Minimum % uppercase for sampling valid genes
 UPPER_CASE: 0.90
 #ROADIES output directory for current iteration
-OUT_DIR: "output_files"
+OUT_DIR: "output_files_dummy_query"
 #ROADIES output directory for all iterations (not needed in --noconverge option)
 ALL_OUT_DIR: "converge_files"
-REF_DIR: "reference_files"
+REF_DIR: "output_files_dummy"
 #Minimum % match in LASTZ alignment
 IDENTITY: 65
 #Minimum % match in LASTZ alignment in deep mode - to capture deeper phylogeny

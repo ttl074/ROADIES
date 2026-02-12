@@ -22,7 +22,7 @@ def comp_tree(t1, t2):
 
 
 # function to run snakemake with settings and add to run folder
-def run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN):
+def run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus):
 
     # Set threads per instance dynamically
     num_threads = cores // fixed_parallel_instances
@@ -37,6 +37,7 @@ def run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode,
         "num_threads=" + str(num_threads),
         "deep_mode=" + str(deep_mode),
         "MIN_ALIGN=" + str(MIN_ALIGN),
+        "num_gpus=" + str(num_gpus),
         "--use-conda",
         "--rerun-incomplete",
     ]
@@ -62,9 +63,10 @@ def converge_run(
     deep_mode,
     MIN_ALIGN,
     ref_path,
+    num_gpus
 ):
     # run snakemake with specificed gene number and length
-    run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN)
+    run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus)
     if (mode == 'placement'):
         os.system(
             "cat {0}/genes/mapping.txt {1}/genes/mapping.txt >> {0}/genes/mapping_combined.txt".format(
@@ -112,8 +114,8 @@ def converge_run(
 if __name__ == "__main__":
     # taking in arguments, have default values for most; information in README.md
     parser = argparse.ArgumentParser(
-        prog="Converge",
-        description="Script to continuously run snakemake with a small number of genes combining the gene trees after each run",
+        prog="Noconverge",
+        description="Script to run snakemake for one iteration",
     )
 
     parser.add_argument("--cores", type=int, default=32, help="number of cores")
@@ -132,12 +134,18 @@ if __name__ == "__main__":
         default="False",
         help="specify if ROADIES will run in deep mode - to capture deeper phylogenetic timescales",
     )
+    parser.add_argument(
+        "--gpu",
+        default="0",
+        help="specify number of GPU cores",
+    )
     # assigning argument values to variables
     args = vars(parser.parse_args())
     config_path = args["config"]
     CORES = args["cores"]
     MODE = args["mode"]
     deep_mode = args["deep"]
+    num_gpus = args["gpu"]
     # read config.yaml for variables
     config = yaml.safe_load(Path(config_path).read_text())
     ref_exist = False
@@ -181,6 +189,7 @@ if __name__ == "__main__":
         deep_mode,
         MIN_ALIGN,
         ref_path,
+        num_gpus
     )
     curr_time = time.time()
     curr_time_l = time.asctime(time.localtime(time.time()))

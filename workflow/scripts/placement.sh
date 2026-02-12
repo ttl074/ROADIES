@@ -137,7 +137,7 @@ grep '^>' "$ref_msa" | sed 's/^>//' > "$TIP_REF"
 # --------------------------
 initial_msa="$workDir/iter0_msa.aln"
 
-/home/ang037@AD.UCSD.EDU/ROADIES-with-TWILIGHT/TWILIGHT/bin/twilight \
+/home/ang037@AD.UCSD.EDU/TWILIGHT/bin/twilight \
     -a "$ref_msa" -i "$seqFile" -o "$initial_msa" -C "$threads" \
     --match 40 --mismatch -7 --transition 17 --gap-open -140 --gap-extend -10 --overwrite
 
@@ -167,7 +167,7 @@ gappa examine graft --jplace-path "$epa_outdir/epa_result.jplace" \
 # --------------------------
 cat "$seqFile" "$refseqFile" > "$workDir/iter1_input.fa"
 
-/home/ang037@AD.UCSD.EDU/ROADIES-with-TWILIGHT/TWILIGHT/bin/twilight \
+/home/ang037@AD.UCSD.EDU/TWILIGHT/bin/twilight \
     -t "$epa_outdir/epa_result.newick" -i "$workDir/iter1_input.fa" \
     -o "$output_msa" -C "$threads" \
     --match 40 --mismatch -7 --transition 17 --gap-open -140 --gap-extend -10 --overwrite
