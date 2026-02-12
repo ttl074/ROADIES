@@ -2,7 +2,6 @@
 # The program stops after configured number of ITERATIONS
 
 # REQUIREMENTS: Activated conda environment with snakemake and ete3
-# USAGE: `python workflow/scripts/converge.py -c {# of cores} --out_dir {converge output directory} --config {config file}`
 
 import os, sys, glob
 import argparse
@@ -78,7 +77,7 @@ def run_snakemake(
 
 
 # function to combine gene trees and mapping files from all iterations
-def combine_iter(out_dir, run, cores):
+def combine_iter(out_dir, run, cores, roadies_dir):
     os.system(
         "cat {0}/{1}/gene_tree_merged.nwk >> {0}/master_gt.nwk".format(out_dir, run)
     )
@@ -97,6 +96,8 @@ def combine_iter(out_dir, run, cores):
             out_dir, run, cores
         )
     )
+    os.system("cp {0}/{1}.nwk {3}/roadies.nwk".format(out_dir, run, roadies_dir))
+    os.system("cp {0}/{1}_stats.nwk {3}/roadies_stats.nwk".format(out_dir, run, roadies_dir))
     # open both master files and get gene trees and mapping
     gt = open(out_dir + "/master_gt.nwk", "r")
     gene_trees = gt.readlines()
@@ -137,7 +138,7 @@ def converge_run(
         cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN
     )
     # merging gene trees and mapping files
-    gene_trees = combine_iter(out_dir, run, cores)
+    gene_trees = combine_iter(out_dir, run, cores, roadies_dir)
     t = Tree(out_dir + "/" + run + ".nwk")
     # add species tree to tree list
     if ref_exist:
@@ -212,10 +213,10 @@ if __name__ == "__main__":
     fixed_parallel_instances = config["NUM_INSTANCES"]
     master_gt = out_dir + "/master_gt.nwk"
     master_map = out_dir + "/master_map.txt"
-    os.system("rm -r {0}".format(out_dir))
-    os.system("mkdir -p " + out_dir)
-    os.system("touch {0}".format(master_gt))
-    os.system("touch {0}".format(master_map))
+    # os.system("rm -r {0}".format(out_dir))
+    # os.system("mkdir -p " + out_dir)
+    # os.system("touch {0}".format(master_gt))
+    # os.system("touch {0}".format(master_map))
     sys.setrecursionlimit(2000)
     os.system("snakemake --unlock")
     # initialize lists for runs and distances
