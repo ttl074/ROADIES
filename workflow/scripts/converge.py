@@ -45,7 +45,7 @@ def read_initial_gene_count(config_path):
 
 # function to run snakemake with settings and add to run folder
 def run_snakemake(
-    cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN
+    cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus
 ):
 
     # Set threads per instance dynamically
@@ -61,6 +61,7 @@ def run_snakemake(
         "num_threads=" + str(num_threads),
         "deep_mode=" + str(deep_mode),
         "MIN_ALIGN=" + str(MIN_ALIGN),
+        "num_gpus=" + str(num_gpus),
         "--use-conda",
         "--rerun-incomplete",
     ]
@@ -119,9 +120,13 @@ def converge_run(
     fixed_parallel_instances,
     deep_mode,
     MIN_ALIGN,
+    ref_path,
+    num_gpus,
+    grow
 ):
     os.system("rm -r {0}".format(roadies_dir))
     os.system("mkdir {0}".format(roadies_dir))
+    os.system("rm {0}".format('sampling_output.txt'))
     run = "iteration_"
     # allows sorting runs correctly
     if iteration < 10:
@@ -135,7 +140,7 @@ def converge_run(
         )  # Read initial GENE_COUNT value
         update_config(config_path, base_gene_count)
     run_snakemake(
-        cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN
+        cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus
     )
     # merging gene trees and mapping files
     gene_trees = combine_iter(out_dir, run, cores, roadies_dir)
@@ -189,12 +194,24 @@ if __name__ == "__main__":
         default="False",
         help="specify if ROADIES will run in deep mode - to capture deeper phylogenetic timescales",
     )
+    parser.add_argument(
+        "--gpu",
+        default="0",
+        help="specify number of GPU cores",
+    )
+    parser.add_argument(
+        "--grow",
+        action="store_true",
+        help="specify if you want to update your tree or grow your tree in placement mode",
+    )
     # assigning argument values to variables
     args = vars(parser.parse_args())
     config_path = args["config"]
     CORES = args["cores"]
     MODE = args["mode"]
     deep_mode = args["deep"]
+    num_gpus = args["gpu"]
+    grow = args["grow"]
     # read config.yaml for variables
     config = yaml.safe_load(Path(config_path).read_text())
     ref_exist = False
@@ -211,12 +228,13 @@ if __name__ == "__main__":
     support_thr = config["SUPPORT_THRESHOLD"]
     roadies_dir = config["OUT_DIR"]
     fixed_parallel_instances = config["NUM_INSTANCES"]
+    ref_path = config["REF_DIR"]
     master_gt = out_dir + "/master_gt.nwk"
     master_map = out_dir + "/master_map.txt"
-    # os.system("rm -r {0}".format(out_dir))
-    # os.system("mkdir -p " + out_dir)
-    # os.system("touch {0}".format(master_gt))
-    # os.system("touch {0}".format(master_map))
+    os.system("rm -r {0}".format(out_dir))
+    os.system("mkdir -p " + out_dir)
+    os.system("touch {0}".format(master_gt))
+    os.system("touch {0}".format(master_map))
     sys.setrecursionlimit(2000)
     os.system("snakemake --unlock")
     # initialize lists for runs and distances
@@ -244,6 +262,9 @@ if __name__ == "__main__":
             fixed_parallel_instances,
             deep_mode,
             MIN_ALIGN,
+            ref_path,
+            num_gpus,
+            grow
         )
         curr_time = time.time()
         curr_time_l = time.asctime(time.localtime(time.time()))

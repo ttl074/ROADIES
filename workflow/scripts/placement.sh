@@ -96,10 +96,7 @@ export OMP_NUM_THREADS="$threads"
 # --------------------------
 # Create necessary directories
 # --------------------------
-mkdir -p "$workDir" \
-         "$workDir/iter0_msa_input" \
-         "$workDir/iter0_tree_output" \
-         "$workDir/query_parts"
+mkdir -p "$workDir" "$workDir/iter0_msa_input" "$workDir/iter0_tree_output" "$workDir/query_parts"
 
 # --------------------------
 # Function to extract sequences by tip list
@@ -137,9 +134,7 @@ grep '^>' "$ref_msa" | sed 's/^>//' > "$TIP_REF"
 # --------------------------
 initial_msa="$workDir/iter0_msa.aln"
 
-/home/ang037@AD.UCSD.EDU/TWILIGHT/bin/twilight \
-    -a "$ref_msa" -i "$seqFile" -o "$initial_msa" -C "$threads" \
-    --match 40 --mismatch -7 --transition 17 --gap-open -140 --gap-extend -10 --overwrite
+/home/ang037@AD.UCSD.EDU/TWILIGHT/bin/twilight -a "$ref_msa" -i "$seqFile" -o "$initial_msa" -C "$threads" --match 40 --mismatch -7 --transition 17 --gap-open -140 --gap-extend -10 --overwrite
 
 # --------------------------
 # Extract sequences from initial MSA
@@ -155,22 +150,16 @@ extract_sequences "$TIP_REF" "$initial_msa" "$OUT_REF"
 # --------------------------
 epa_outdir="$workDir/iter0_tree_output"
 
-epa-ng --ref-msa "$OUT_REF" --tree "$ref_gene_tree" \
-       --query "$OUT_QUERY" --model "$ref_model" --threads "$threads" \
-       --outdir "$epa_outdir" --redo
+epa-ng --ref-msa "$OUT_REF" --tree "$ref_gene_tree" --query "$OUT_QUERY" --model "$ref_model" --threads "$threads" --outdir "$epa_outdir" --redo
 
-gappa examine graft --jplace-path "$epa_outdir/epa_result.jplace" \
-                    --out-dir "$epa_outdir" --fully-resolve
+gappa examine graft --jplace-path "$epa_outdir/epa_result.jplace" --out-dir "$epa_outdir" --fully-resolve
 
 # --------------------------
 # Prepare next input for Twilight
 # --------------------------
 cat "$seqFile" "$refseqFile" > "$workDir/iter1_input.fa"
 
-/home/ang037@AD.UCSD.EDU/TWILIGHT/bin/twilight \
-    -t "$epa_outdir/epa_result.newick" -i "$workDir/iter1_input.fa" \
-    -o "$output_msa" -C "$threads" \
-    --match 40 --mismatch -7 --transition 17 --gap-open -140 --gap-extend -10 --overwrite
+/home/ang037@AD.UCSD.EDU/TWILIGHT/bin/twilight -t "$epa_outdir/epa_result.newick" -i "$workDir/iter1_input.fa" -o "$output_msa" -C "$threads" --match 40 --mismatch -7 --transition 17 --gap-open -140 --gap-extend -10 --overwrite
 
 # --------------------------
 # Extract sequences from iter1 MSA
@@ -201,15 +190,9 @@ for query in "$workDir"/query_parts/*.fa; do
     iterDir="$workDir/${base}_placement"
     mkdir -p "$iterDir"
 
-    epa-ng --ref-msa "$workDir/backbone_msa.fa" \
-           --tree "$workDir/backbone_tree.nwk" \
-           --query "$query" \
-           --model "$ref_model" \
-           --threads "$threads" \
-           --outdir "$iterDir"
+    epa-ng --ref-msa "$workDir/backbone_msa.fa" --tree "$workDir/backbone_tree.nwk" --query "$query" --model "$ref_model" --threads "$threads" --outdir "$iterDir"
 
-    gappa examine graft --jplace-path "$iterDir/epa_result.jplace" \
-                        --out-dir "$iterDir" --fully-resolve
+    gappa examine graft --jplace-path "$iterDir/epa_result.jplace" --out-dir "$iterDir" --fully-resolve
 
     # Update backbone tree
     [ -f "$iterDir/epa_result.newick" ] || { echo "EPA result missing for $base"; exit 1; }

@@ -20,9 +20,11 @@ parser.add_argument("--config", default="config/config.yaml",
 parser.add_argument("--deep", action="store_true",
                     help="enable deep phylogeny mode")
 
-# SINGLE GPU ARG
 parser.add_argument("--gpu", type=int, default=0,
                     help="number of GPUs to use (0 = CPU mode)")
+
+parser.add_argument("--grow", action="store_true",
+                    help="Specify if you want to grow your tree or if you want to update your tree in placement mode")
 
 args = parser.parse_args()
 
@@ -40,6 +42,9 @@ command = [
 
 if args.deep:
     command.append("--deep")
+
+if args.grow:
+    command.append("--grow")
 
 print("Running:", " ".join(command))
 subprocess.run(command, check=True)

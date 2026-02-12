@@ -63,7 +63,8 @@ def converge_run(
     deep_mode,
     MIN_ALIGN,
     ref_path,
-    num_gpus
+    num_gpus,
+    grow
 ):
     # run snakemake with specificed gene number and length
     run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus)
@@ -73,16 +74,29 @@ def converge_run(
                 roadies_dir, ref_path
             )
         )
-        os.system(
-            "astral-pro3 -t {1} -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies.nwk -a {0}/genes/mapping_combined.txt".format(
-                roadies_dir, cores
+        if (grow):
+            os.system(
+                "astral-pro3 -t {1} --constraint {2}/roadies.nwk -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies.nwk -a {0}/genes/mapping_combined.txt".format(
+                    roadies_dir, cores, ref_path
+                )
             )
-        )
-        os.system(
-            "astral-pro3 -t {1} -u 3 -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies_stats.nwk -a {0}/genes/mapping_combined.txt".format(
-                roadies_dir, cores
+            os.system(
+                "astral-pro3 -t {1} -u 3 --constraint {2}/roadies.nwk -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies_stats.nwk -a {0}/genes/mapping_combined.txt".format(
+                    roadies_dir, cores, ref_path
+                )
             )
-        )
+        else:
+            os.system(
+                "astral-pro3 -t {1} -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies.nwk -a {0}/genes/mapping_combined.txt".format(
+                    roadies_dir, cores
+                )
+            )
+            os.system(
+                "astral-pro3 -t {1} -u 3 -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies_stats.nwk -a {0}/genes/mapping_combined.txt".format(
+                    roadies_dir, cores
+                )
+            )
+
     else:
         os.system(
             "astral-pro3 -t {1} -i {0}/genetrees/gene_tree_merged.nwk -o {0}/roadies.nwk -a {0}/genes/mapping.txt".format(
@@ -94,7 +108,6 @@ def converge_run(
                 roadies_dir, cores
             )
         )
-
 
     gt = open(roadies_dir + "/genetrees/gene_tree_merged.nwk", "r")
     gene_trees = gt.readlines()
@@ -131,13 +144,18 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--deep",
-        default="False",
+        action="store_true",
         help="specify if ROADIES will run in deep mode - to capture deeper phylogenetic timescales",
     )
     parser.add_argument(
         "--gpu",
         default="0",
         help="specify number of GPU cores",
+    )
+    parser.add_argument(
+        "--grow",
+        action="store_true",
+        help="specify if you want to update your tree or grow your tree in placement mode",
     )
     # assigning argument values to variables
     args = vars(parser.parse_args())
@@ -146,6 +164,7 @@ if __name__ == "__main__":
     MODE = args["mode"]
     deep_mode = args["deep"]
     num_gpus = args["gpu"]
+    grow = args["grow"]
     # read config.yaml for variables
     config = yaml.safe_load(Path(config_path).read_text())
     ref_exist = False
@@ -189,7 +208,8 @@ if __name__ == "__main__":
         deep_mode,
         MIN_ALIGN,
         ref_path,
-        num_gpus
+        num_gpus,
+        grow
     )
     curr_time = time.time()
     curr_time_l = time.asctime(time.localtime(time.time()))
