@@ -192,7 +192,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--deep",
-        default="False",
+        action="store_true",
         help="specify if ROADIES will run in deep mode - to capture deeper phylogenetic timescales",
     )
     parser.add_argument(
