@@ -62,6 +62,6 @@ rule lastz2fasta:
 		statdir = config["OUT_DIR"]+"/statistics",
 		d = config["MAX_DUP"],
 		mode = mode,
-		num_gpus = num_gpus
+		gpu = gpu
 	shell:
-		"python workflow/scripts/lastz2fasta.py -k {params.k} --path {params.p} --outdir {params.out} -m {params.m} --plotdir {params.plotdir} --statdir {params.statdir} -d {params.d} --tool {params.mode} --gpu {params.num_gpus}" 
+		"python workflow/scripts/lastz2fasta.py -k {params.k} --path {params.p} --outdir {params.out} -m {params.m} --plotdir {params.plotdir} --statdir {params.statdir} -d {params.d} --tool {params.mode} --gpu {params.gpu}" 

@@ -13,7 +13,7 @@ rule kegalign:
         maf = config["OUT_DIR"] + "/alignments/{sample}.maf"
     benchmark:
         config["OUT_DIR"] + "/benchmarks/{sample}.kegalign.txt"
-    threads: lambda wildcards: int(config["num_threads"])
+    threads: lambda wildcards: int(16)
     params:
         species = "{sample}",
         identity = config["IDENTITY"],
@@ -26,22 +26,22 @@ rule kegalign:
         scores = config["SCORES"],
         align_dir = config["OUT_DIR"] + "/alignments",
         tool_dir = "/home/ang037@AD.UCSD.EDU/.conda/envs/roadies_env/ROADIES/KegAlign/scripts",
-        num_gpu = num_gpus
-
+        gpu = gpu
     conda:
         "../envs/kegalign.yaml"
-
     shell:
-        r"""
+        """
         exec > >(tee {wildcards.sample}_timing.log) 2>&1
+
+        export CUDA_VISIBLE_DEVICES=1
 
         sample_workdir={params.align_dir}/{wildcards.sample}
         mkdir -p $sample_workdir/work
         cd $sample_workdir/work
 
         # Convert fasta to 2bit
-        /usr/bin/time faToTwoBit <(gzip -cdfq {input.genome}) ref.2bit
-        /usr/bin/time faToTwoBit <(gzip -cdfq {input.genes}) query.2bit
+        /usr/bin/time faToTwoBit <(zcat -f {input.genome}) ref.2bit
+        /usr/bin/time faToTwoBit <(zcat -f {input.genes}) query.2bit
 
         cd ..
 
@@ -50,7 +50,7 @@ rule kegalign:
             --diagonal-partition \
             --format maf- \
             --num-cpu {threads} \
-            --num-gpu {params.num_gpu} \
+            --num-gpu {params.gpu} \
             --output-file data_package.tgz \
             --output-type tarball \
             --tool_directory {params.tool_dir} \
@@ -68,17 +68,13 @@ rule kegalign:
 
         # Generate lastz command list (GPU accelerated)
         /usr/bin/time -v kegalign {input.genome} {input.genes} work/ \
-            --num_gpu {params.num_gpu} \
+            --num_gpu {params.gpu} \
             --num_threads {threads} > {wildcards.sample}_lastz-commands.txt
 
         # Inject biological thresholds (mirror LASTZ behavior)
         awk '{{
             sub(/ 2> /,
-                " --coverage={params.coverage} --continuity={params.continuity} "
-                "--filter=identity:{params.identity} "
-                "--ambiguous=iupac --step={params.steps} "
-                "--queryhspbest={params.max_dup} "
-                "--scores={params.scores} 2> ");
+                " --coverage={params.coverage} --continuity={params.continuity} --filter=identity:{params.identity} --ambiguous=iupac --step={params.steps} --queryhspbest={params.max_dup} --scores={params.scores} 2> ");
             print
         }}' {wildcards.sample}_lastz-commands.txt > {wildcards.sample}_lastz-commands.final.sh
 
@@ -109,7 +105,7 @@ rule lastz2fasta:
 		plotdir = config["OUT_DIR"]+"/plots",
 		statdir = config["OUT_DIR"]+"/statistics",
 		d = config["MAX_DUP"],
-        mode = mode,
-        num_gpus = num_gpus
+		mode = mode,
+		gpu = gpu
 	shell:
-		"python workflow/scripts/lastz2fasta.py -k {params.k} --path {params.p} --outdir {params.out} -m {params.m} --plotdir {params.plotdir} --statdir {params.statdir} -d {params.d} --tool {params.mode} --gpu {params.num_gpus}" 
+		"python workflow/scripts/lastz2fasta.py -k {params.k} --path {params.p} --outdir {params.out} -m {params.m} --plotdir {params.plotdir} --statdir {params.statdir} -d {params.d} --tool {params.mode} --gpu {params.gpu}" 

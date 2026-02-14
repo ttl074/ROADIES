@@ -10,7 +10,6 @@ rule sequence_select:
 		THRES=config["UPPER_CASE"]
 	benchmark:
 		config["OUT_DIR"]+"/benchmarks/{sample}.sample.txt"
-	threads: 256
 	output: sample_file = config["OUT_DIR"]+"/samples/{sample}_temp.fa"
 	shell:
 		'''

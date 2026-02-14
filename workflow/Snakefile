@@ -19,7 +19,7 @@ IDS = list(range(1,num+1))
 mode = config.get("mode","accurate")
 deep_mode = config.get("deep","False")
 MIN_ALIGN = config.get("MIN_ALIGN",4)
-num_gpus = config.get("gpu",0)
+gpu = int(config.get("gpu",0))
 
 SELECTED_SAMPLES = []
 od = {}
@@ -52,7 +52,7 @@ if (mode == "fast"):
 	include: "rules/mashtree.smk"
 elif (mode == "balanced"):
 	include: "rules/sampling.smk"
-	if num_gpus != 0:
+	if gpu != 0:
 		include: "rules/pair_align_gpu.smk"
 		include: "rules/multi_align_gpu.smk"
 	else:
@@ -60,14 +60,14 @@ elif (mode == "balanced"):
 		include: "rules/multi_align.smk"
 	include: "rules/fasttree.smk"
 elif (mode == "placement"):
-	if num_gpus != 0:
+	if gpu != 0:
 		include: "rules/pair_align_gpu.smk"
 	else:
 		include: "rules/pair_align.smk"
 	include: "rules/placement.smk"
 else:
 	include: "rules/sampling.smk"
-	if num_gpus != 0:
+	if gpu != 0:
 		include: "rules/pair_align_gpu.smk"
 		include: "rules/multi_align_gpu.smk"
 	else:

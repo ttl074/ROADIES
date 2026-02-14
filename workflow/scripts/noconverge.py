@@ -22,7 +22,7 @@ def comp_tree(t1, t2):
 
 
 # function to run snakemake with settings and add to run folder
-def run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus):
+def run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, gpu):
 
     # Set threads per instance dynamically
     num_threads = cores // fixed_parallel_instances
@@ -37,9 +37,10 @@ def run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode,
         "num_threads=" + str(num_threads),
         "deep_mode=" + str(deep_mode),
         "MIN_ALIGN=" + str(MIN_ALIGN),
-        "num_gpus=" + str(num_gpus),
+        "gpu=" + str(gpu),
         "--use-conda",
         "--rerun-incomplete",
+        "--conda-frontend", "conda"
     ]
     for i in range(len(cmd)):
         if i == len(cmd) - 1:
@@ -63,11 +64,11 @@ def converge_run(
     deep_mode,
     MIN_ALIGN,
     ref_path,
-    num_gpus,
+    gpu,
     grow
 ):
     # run snakemake with specificed gene number and length
-    run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus)
+    run_snakemake(cores, mode, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, gpu)
     if (mode == 'placement'):
         os.system(
             "cat {0}/genes/mapping.txt {1}/genes/mapping.txt >> {0}/genes/mapping_combined.txt".format(
@@ -163,7 +164,7 @@ if __name__ == "__main__":
     CORES = args["cores"]
     MODE = args["mode"]
     deep_mode = args["deep"]
-    num_gpus = args["gpu"]
+    gpu = args["gpu"]
     grow = args["grow"]
     # read config.yaml for variables
     config = yaml.safe_load(Path(config_path).read_text())
@@ -208,7 +209,7 @@ if __name__ == "__main__":
         deep_mode,
         MIN_ALIGN,
         ref_path,
-        num_gpus,
+        gpu,
         grow
     )
     curr_time = time.time()

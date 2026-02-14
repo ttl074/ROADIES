@@ -45,7 +45,7 @@ def read_initial_gene_count(config_path):
 
 # function to run snakemake with settings and add to run folder
 def run_snakemake(
-    cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus
+    cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, gpu
 ):
 
     # Set threads per instance dynamically
@@ -61,9 +61,10 @@ def run_snakemake(
         "num_threads=" + str(num_threads),
         "deep_mode=" + str(deep_mode),
         "MIN_ALIGN=" + str(MIN_ALIGN),
-        "num_gpus=" + str(num_gpus),
+        "gpu=" + str(gpu),
         "--use-conda",
         "--rerun-incomplete",
+        "--conda-frontend", "conda"
     ]
     for i in range(len(cmd)):
         if i == len(cmd) - 1:
@@ -97,8 +98,8 @@ def combine_iter(out_dir, run, cores, roadies_dir):
             out_dir, run, cores
         )
     )
-    os.system("cp {0}/{1}.nwk {3}/roadies.nwk".format(out_dir, run, roadies_dir))
-    os.system("cp {0}/{1}_stats.nwk {3}/roadies_stats.nwk".format(out_dir, run, roadies_dir))
+    os.system("cp {0}/{1}.nwk {2}/roadies.nwk".format(out_dir, run, roadies_dir))
+    os.system("cp {0}/{1}_stats.nwk {2}/roadies_stats.nwk".format(out_dir, run, roadies_dir))
     # open both master files and get gene trees and mapping
     gt = open(out_dir + "/master_gt.nwk", "r")
     gene_trees = gt.readlines()
@@ -121,7 +122,7 @@ def converge_run(
     deep_mode,
     MIN_ALIGN,
     ref_path,
-    num_gpus,
+    gpu,
     grow
 ):
     os.system("rm -r {0}".format(roadies_dir))
@@ -140,7 +141,7 @@ def converge_run(
         )  # Read initial GENE_COUNT value
         update_config(config_path, base_gene_count)
     run_snakemake(
-        cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, num_gpus
+        cores, mode, out_dir, run, roadies_dir, config_path, fixed_parallel_instances, deep_mode, MIN_ALIGN, gpu
     )
     # merging gene trees and mapping files
     gene_trees = combine_iter(out_dir, run, cores, roadies_dir)
@@ -210,7 +211,7 @@ if __name__ == "__main__":
     CORES = args["cores"]
     MODE = args["mode"]
     deep_mode = args["deep"]
-    num_gpus = args["gpu"]
+    gpu = args["gpu"]
     grow = args["grow"]
     # read config.yaml for variables
     config = yaml.safe_load(Path(config_path).read_text())
@@ -263,7 +264,7 @@ if __name__ == "__main__":
             deep_mode,
             MIN_ALIGN,
             ref_path,
-            num_gpus,
+            gpu,
             grow
         )
         curr_time = time.time()
