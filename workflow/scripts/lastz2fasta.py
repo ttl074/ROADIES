@@ -26,14 +26,14 @@ parser.add_argument("--plotdir", default="results/plots")
 parser.add_argument("--statdir", default="results/statistics")
 parser.add_argument("-d", type=int, default=100)
 parser.add_argument("--tool", default="accurate")
-parser.add_argument("--gpu", type=int, default=0)
+parser.add_argument("--gpu", default="0")
 args = parser.parse_args()
 path = args.path
 outdir = args.outdir
 plotdir = args.plotdir
 statdir = args.statdir
 tool = args.tool
-num_gpus = args.gpu
+num_gpus = int(args.gpu)
 if tool == "placement":
     m = 1 #args.m
 else:

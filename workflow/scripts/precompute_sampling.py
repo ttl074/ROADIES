@@ -82,10 +82,37 @@ for s in prob_dict:
     prob_dict[s] /= total
 
 # Sampling logic (adjust num as necessary)
+# od = OrderedDict([(s, 0) for s in SELECTED_SAMPLES])
+# sampled_species = random.choices(SELECTED_SAMPLES, weights=[prob_dict[s] for s in SELECTED_SAMPLES], k=args.num)
+# for s in sampled_species:
+#     od[s] += 1
+
+use_group_sampling = bool(args.group_csv and os.path.exists(args.group_csv))
+
+# Sampling logic
 od = OrderedDict([(s, 0) for s in SELECTED_SAMPLES])
-sampled_species = random.choices(SELECTED_SAMPLES, weights=[prob_dict[s] for s in SELECTED_SAMPLES], k=args.num)
-for s in sampled_species:
-    od[s] += 1
+
+if use_group_sampling:
+    # Probabilistic sampling from group CSV
+    sampled_species = random.choices(
+        SELECTED_SAMPLES,
+        weights=[prob_dict[s] for s in SELECTED_SAMPLES],
+        k=args.num
+    )
+    for s in sampled_species:
+        od[s] += 1
+else:
+    # No group CSV: ensure each species is sampled at least once
+    od = OrderedDict([(s, 1) for s in SELECTED_SAMPLES])  # everyone gets 1
+    remaining = args.num - len(SELECTED_SAMPLES)
+    if remaining > 0:
+        extra_samples = random.choices(
+            SELECTED_SAMPLES,
+            weights=[prob_dict[s] for s in SELECTED_SAMPLES],
+            k=remaining
+        )
+        for s in extra_samples:
+            od[s] += 1
 
 # Define od_e
 temInt = 1

@@ -25,7 +25,7 @@ rule kegalign:
         deep_mode = str(deep_mode),
         scores = config["SCORES"],
         align_dir = config["OUT_DIR"] + "/alignments",
-        tool_dir = "/home/ang037@AD.UCSD.EDU/.conda/envs/roadies_env/ROADIES/KegAlign/scripts",
+        tool_dir = "/home/ubuntu/KegAlign/scripts",
         gpu = gpu
     conda:
         "../envs/kegalign.yaml"
@@ -33,20 +33,18 @@ rule kegalign:
         """
         exec > >(tee {wildcards.sample}_timing.log) 2>&1
 
-        export CUDA_VISIBLE_DEVICES=1
-
         sample_workdir={params.align_dir}/{wildcards.sample}
         mkdir -p $sample_workdir/work
         cd $sample_workdir/work
 
         # Convert fasta to 2bit
-        /usr/bin/time faToTwoBit <(zcat -f {input.genome}) ref.2bit
-        /usr/bin/time faToTwoBit <(zcat -f {input.genes}) query.2bit
+        faToTwoBit <(zcat -f {input.genome}) ref.2bit
+        faToTwoBit <(zcat -f {input.genes}) query.2bit
 
         cd ..
 
         # Package inputs
-        /usr/bin/time -v python {params.tool_dir}/runner.py \
+        python {params.tool_dir}/runner.py \
             --diagonal-partition \
             --format maf- \
             --num-cpu {threads} \
@@ -57,17 +55,17 @@ rule kegalign:
             {input.genome} {input.genes}
 
         # Extract results
-        /usr/bin/time -v python {params.tool_dir}/package_output.py \
+        python {params.tool_dir}/package_output.py \
             --format_selector maf \
             --tool_directory {params.tool_dir}
 
-        /usr/bin/time -v python {params.tool_dir}/run_lastz_tarball.py \
+        python {params.tool_dir}/run_lastz_tarball.py \
             --input=data_package.tgz \
             --output={wildcards.sample}.maf \
             --parallel={threads}
 
         # Generate lastz command list (GPU accelerated)
-        /usr/bin/time -v kegalign {input.genome} {input.genes} work/ \
+        kegalign {input.genome} {input.genes} work/ \
             --num_gpu {params.gpu} \
             --num_threads {threads} > {wildcards.sample}_lastz-commands.txt
 
@@ -80,9 +78,9 @@ rule kegalign:
 
         chmod +x {wildcards.sample}_lastz-commands.final.sh
 
-        /usr/bin/time -v parallel --max-procs {threads} < {wildcards.sample}_lastz-commands.final.sh
+        parallel --max-procs {threads} --joblog {wildcards.sample}_parallel.log < {wildcards.sample}_lastz-commands.final.sh || true
 
-        (echo "##maf version=1"; cat *.maf-) > {output.maf}
+        (cat $sample_workdir/output.maf) > {output.maf}
         """
 
 
