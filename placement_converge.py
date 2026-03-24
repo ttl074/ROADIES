@@ -15,8 +15,8 @@ max_iterations = 9
 cores = 64  # cores for ASTRAL
 roadies_dir = "roadies_final"
 
-backbone_species = "/data/ang037/roadies-datasets/bamboo_reference"
-query_species = "/data/ang037/roadies-datasets/bamboo_query"
+backbone_species = "/data/ang037/roadies-datasets/Output_folder_1000_taxa/reference_genomes"
+query_species = "/data/ang037/roadies-datasets/Output_folder_1000_taxa/query_genomes"
 
 Path(out_base_dir, roadies_dir).mkdir(parents=True, exist_ok=True)
 
@@ -29,7 +29,7 @@ def run_roadies(mode):
     print(f"Running ROADIES: {cmd}")
     subprocess.run(cmd, check=True)
 
-def update_gene_count(iteration, base_gene_count=500):
+def update_gene_count(iteration, base_gene_count=100):
     with open(config_file, "r") as f:
         config = yaml.safe_load(f)
 
