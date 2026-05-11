@@ -1,7 +1,0 @@
-DEBUG=0
-USE_DOUBLE=1
-LINEINFO=0
-CUDA_HOME=/usr/local/cuda-12
-PLL_INC_DIR=/usr/local/include
-PLL_LIB_DIR=/usr/local/lib
-NVCC_ARCH=-gencode arch=compute_75,code=sm_75 -gencode arch=compute_80,code=sm_80 -gencode arch=compute_86,code=sm_86 -gencode arch=compute_86,code=compute_86
