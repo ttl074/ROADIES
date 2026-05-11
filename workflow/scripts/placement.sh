@@ -77,8 +77,8 @@ extract_sequences "$TIP_REF" "$output_msa" "$OUT_REF_ITR1"
 # mkdir $workDir/iter1_tree_output
 
 # /home/ang037@AD.UCSD.EDU/conda/pkgs/raxml-ng-1.2.2-h6747034_2/bin/raxml-ng --msa $output_msa --model GTR+G+F --threads auto{{$threads}} --tree-constraint $ref_gene_tree --prefix $workDir/iter1_tree_output/gene_tree --redo --blopt nr_safe
-/home/ang037@AD.UCSD.EDU/raxml-ng --msa $output_msa --model GTR+G+F --threads auto{{$threads}} --workers 1 --tree-constraint $ref_gene_tree --prefix $workDir/iter1_tree_output/gene_tree --stop-rule KH --tree pars{5} --redo
-# ${roadies_root}/MLIPPER/MLIPPER --tree-alignment $workDir/iter1_output_msa_from_ref.fa --query-alignment $workDir/iter1_output_msa_from_query.fa --tree $ref_gene_tree --best-model $ref_model --commit-to-tree $output_gene_trees
+# /home/ang037@AD.UCSD.EDU/raxml-ng --msa $output_msa --model GTR+G+F --threads auto{{$threads}} --workers 1 --tree-constraint $ref_gene_tree --prefix $workDir/iter1_tree_output/gene_tree --stop-rule KH --tree pars{5} --redo
+${roadies_root}/MLIPPER/MLIPPER --tree-alignment $workDir/iter1_output_msa_from_ref.fa --query-alignment $workDir/iter1_output_msa_from_query.fa --tree $ref_gene_tree --best-model $ref_model --commit-to-tree $output_gene_trees
 
 # cp $workDir/iter1_tree_output/gene_tree.raxml.bestTree $output_gene_trees
 
