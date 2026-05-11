@@ -24,18 +24,19 @@ rule pasta:
 		ref_msa = config["REF_DIR"]+"/genes/gene_{id}_filtered.fa.aln",
         ref_gene_tree = config["REF_DIR"]+"/genes/gene_{id}_filtered.fa.aln.raxml.bestTree",
         ref_model = config["REF_DIR"]+"/genes/gene_{id}_filtered.fa.aln.raxml.bestModel",
-		ref_sequences = config["REF_DIR"]+"/genes/gene_{id}.fa"
+		ref_sequences = config["REF_DIR"]+"/genes/gene_{id}.fa",
+		roadies_root = lambda wildcards: os.path.abspath(os.path.join(workflow.basedir, ".."))
 	benchmark:
 		config["OUT_DIR"]+"/benchmarks/{id}.pasta.txt"
-	threads: lambda wildcards: int(8)
+	threads: lambda wildcards: int(config.get("num_threads", 8))
 	shell:
 		'''
 		if [[ `grep -n '>' {input.input_sequence} | wc -l` -gt 0 ]]
 		then
 			if [[ -s {params.ref_gene_tree} ]]
 			then
-				./workflow/scripts/placement.sh {input.input_sequence} {threads} {params.workdir} {params.ref_msa} {params.ref_gene_tree} {params.ref_model} {params.msa} {output.gene_tree} {params.ref_sequences}
-				
+				./workflow/scripts/placement.sh {input.input_sequence} {threads} {params.workdir} {params.ref_msa} {params.ref_gene_tree} {params.ref_model} {params.msa} {output.gene_tree} {params.ref_sequences} {params.roadies_root}
+
 			else
 				cp {params.ref_gene_tree} {output.gene_tree}
 			fi
@@ -62,4 +63,3 @@ rule mergeTrees:
             echo "$id, $(cat $file)" >> {output.original_list}
         done
 		'''
-

@@ -1,9 +1,9 @@
 num_species = len(os.listdir(config["GENOMES"]))
 
 if (mode == "placement"):
-	g = config["REF_DIR"]+"/samples/out.fa"
+    g = config["REF_DIR"] + "/samples/out.fa"
 else:
-	g = config["OUT_DIR"]+"/samples/out.fa"
+    g = config["OUT_DIR"] + "/samples/out.fa"
 
 rule kegalign:
     input:
@@ -12,75 +12,47 @@ rule kegalign:
     output:
         maf = config["OUT_DIR"] + "/alignments/{sample}.maf"
     benchmark:
-        config["OUT_DIR"] + "/benchmarks/{sample}.kegalign.txt"
-    threads: lambda wildcards: int(16)
+        config["OUT_DIR"] + "/benchmarks/{sample}.lastz.txt"
+    threads: lambda wildcards: int(8)
     params:
-        species = "{sample}",
-        identity = config["IDENTITY"],
-        identity_deep = config["IDENTITY_DEEP"],
-        coverage = config["COVERAGE"],
-        continuity = config["CONTINUITY"],
-        steps = config["STEPS"],
-        max_dup = 2 * int(config["MAX_DUP"]),
-        deep_mode = str(deep_mode),
-        scores = config["SCORES"],
         align_dir = config["OUT_DIR"] + "/alignments",
-        tool_dir = "/home/ubuntu/KegAlign/scripts",
-        gpu = gpu
+        scores_path = lambda wildcards: os.path.join(workflow.basedir, "..", config.get("SCORES", "HOXD55.q")),
+        num_gpu = config.get("NUM_GPU", 2)
     conda:
         "../envs/kegalign.yaml"
     shell:
         """
-        exec > >(tee {wildcards.sample}_timing.log) 2>&1
-
+		exec > >(tee {wildcards.sample}_timing.log) 2>&1
         sample_workdir={params.align_dir}/{wildcards.sample}
-        mkdir -p $sample_workdir/work
-        cd $sample_workdir/work
+        mkdir -p $sample_workdir
+        cd $sample_workdir
+        mkdir -p work
+        cd work
 
-        # Convert fasta to 2bit
-        faToTwoBit <(zcat -f {input.genome}) ref.2bit
-        faToTwoBit <(zcat -f {input.genes}) query.2bit
+        /usr/bin/time faToTwoBit <(gzip -cdfq {input.genome}) ref.2bit
+        /usr/bin/time faToTwoBit <(gzip -cdfq {input.genes}) query.2bit
 
         cd ..
 
-        # Package inputs
-        python {params.tool_dir}/runner.py \
-            --diagonal-partition \
-            --format maf- \
-            --num-cpu {threads} \
-            --num-gpu {params.gpu} \
-            --output-file data_package.tgz \
-            --output-type tarball \
-            --tool_directory {params.tool_dir} \
-            {input.genome} {input.genes}
-
-        # Extract results
-        python {params.tool_dir}/package_output.py \
-            --format_selector maf \
-            --tool_directory {params.tool_dir}
-
-        python {params.tool_dir}/run_lastz_tarball.py \
-            --input=data_package.tgz \
-            --output={wildcards.sample}.maf \
-            --parallel={threads}
-
-        # Generate lastz command list (GPU accelerated)
-        kegalign {input.genome} {input.genes} work/ \
-            --num_gpu {params.gpu} \
+        /usr/bin/time -v kegalign {input.genome} {input.genes} work/ \
+            --num_gpu {params.num_gpu} \
             --num_threads {threads} > {wildcards.sample}_lastz-commands.txt
 
-        # Inject biological thresholds (mirror LASTZ behavior)
-        awk '{{
-            sub(/ 2> /,
-                " --coverage={params.coverage} --continuity={params.continuity} --filter=identity:{params.identity} --ambiguous=iupac --step={params.steps} --queryhspbest={params.max_dup} --scores={params.scores} 2> ");
-            print
-        }}' {wildcards.sample}_lastz-commands.txt > {wildcards.sample}_lastz-commands.final.sh
+		awk '{{
+		sub(/ 2> /,
+			" --coverage=85 --continuity=85 --filter=identity:40 --ambiguous=iupac --step=1 --queryhspbest=20 --scores={params.scores_path} 2> ");
+			print
+		}}' {wildcards.sample}_lastz-commands.txt \
+		> {wildcards.sample}_lastz-commands.final.sh
 
         chmod +x {wildcards.sample}_lastz-commands.final.sh
 
-        parallel --max-procs {threads} --joblog {wildcards.sample}_parallel.log < {wildcards.sample}_lastz-commands.final.sh || true
+        /usr/bin/time -v parallel --max-procs {threads} \
+            < {wildcards.sample}_lastz-commands.final.sh
 
-        (cat $sample_workdir/output.maf) > {output.maf}
+        (echo "##maf version=1"; cat *.maf-) > {output.maf}
+
+        rm -rf $sample_workdir
         """
 
 

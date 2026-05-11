@@ -83,9 +83,9 @@ def combine_iter(out_dir, run, cores, roadies_dir):
     os.system(
         "cat {0}/{1}/gene_tree_merged.nwk >> {0}/master_gt.nwk".format(out_dir, run)
     )
-    os.system("cp {0}/master_gt.nwk {0}/{1}.gt.nwk")
+    # os.system("cp {0}/master_gt.nwk {0}/{1}.gt.nwk".format(out_dir, run))
     os.system("cat {0}/{1}/mapping.txt >> {0}/master_map.txt".format(out_dir, run))
-    os.system("cp {0}/master_map.txt {0}/{1}.map.txt")
+    # os.system("cp {0}/master_map.txt {0}/{1}.map.txt".format(out_dir, run))
 
     # open both files and get lines, each line is a separate gene tree
     os.system(

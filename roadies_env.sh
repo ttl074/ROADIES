@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 # Required installations: (uncomment next 2 lines if you have sudo access, otherwise make sure following tools are installed before proceeding)
 # sudo apt-get update
@@ -19,7 +20,7 @@ source "${CONDA_PATH}/etc/profile.d/conda.sh"  # Temporarily source conda for th
 source "${CONDA_PATH}/etc/profile.d/mamba.sh"  # Temporarily source mamba for this script
 
 if ! conda env list | grep -q "roadies_env"; then
-    mamba create -y -c conda-forge -c bioconda --name roadies_env snakemake alive-progress biopython iqtree=2.2.0.3 numpy lastz mashtree matplotlib seaborn treeswift=1.1.28 fasttree=2.1.11 python=3.11 raxml-ng ete3 lastz=1.04.52 aster=1.19 pyyaml seaborn
+    mamba create -y -c conda-forge -c bioconda --name roadies_env snakemake alive-progress biopython iqtree=2.2.0.3 numpy lastz mashtree matplotlib seaborn treeswift=1.1.28 fasttree=2.1.11 python=3.11 raxml-ng ete3 lastz=1.04.52 aster=1.19 pyyaml seaborn twilight libstdcxx-ng
 fi
 conda activate roadies_env
 

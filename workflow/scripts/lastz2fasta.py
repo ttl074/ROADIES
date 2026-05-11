@@ -268,7 +268,7 @@ for filename in glob.glob(os.path.join(outdir, "*.fa")):
     else:
         with open(filename, "w") as w:
             w.write("")
-sorted(gene_dup)
+gene_dup.sort()
 # output duplicity as csv
 with open(statdir + "/gene_dup.csv", "w") as f:
     f.write("Species,number of genes aligned" + "\n")
